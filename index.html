@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <!-- Basic meta elements -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>References</title>
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="style.css">
+
+    <!-- KaTeX -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.10.2/dist/katex.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/katex@0.10.2/dist/katex.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/katex@0.10.2/dist/contrib/auto-render.min.js"></script>
+    <script>
+        var delimiters = [
+            { left: "$",   right: "$",   display: false}
+        ];
+    
+        document.addEventListener("DOMContentLoaded", function() {
+            renderMathInElement(document.body, { delimiters: delimiters });
+    
+            document.querySelectorAll("script[type='math/tex']").forEach(function(el) {
+                el.outerHTML = katex.renderToString(el.textContent, { 
+                    displayMode: false, 
+                    macros: macros 
+                });
+            });
+    
+            document.querySelectorAll("script[type='math/tex; mode=display']").forEach(function(el) {
+                el.outerHTML = katex.renderToString(el.textContent.replace(/%.*/g, ''), { 
+                    displayMode: true, 
+                    macros: macros 
+                });
+            });
+        });
+    </script>
+    
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.10.2/dist/contrib/copy-tex.css">
+    <script src="https://cdn.jsdelivr.net/npm/katex@0.10.2/dist/contrib/copy-tex.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+</head>
+<body>
+    <div class="masthead">
+        <div class="container">
+            <h1 class="masthead-title">References</h1>
+            <p class="masthead-subtitle">on hybrid CV-DV quantum computation and beyond</p>
+        </div>
+    </div>
+
+    <div id="content" class="reference-list">
+        <h2>Overview</h2>
+        <div id="references">
+            <ul>
+                <bib-li cite="liu2024hybrid">ISA</bib-li>
+                <bib-li cite="crane2024hybrid">Simulation</bib-li>
+            </ul>
+        </div>
+        <h2>QSP</h2>
+        <div id="references">
+            <ul>
+                <bib-li cite="low2017optimal">Hamiltonian Simulation by QSP</bib-li>
+                <bib-li cite="gilyen2019quantum">QSVT</bib-li>
+            </ul>
+        </div>
+    </div>
+
+    <footer class="footer">
+        <div class="container">
+            <p>&copy; 2025 Xi Lu. Released under the MIT license. View on <a href="https://github.com/helloluxi/refs">GitHub</a></p>
+        </div>
+    </footer>
+
+    <script src="./bibtexParse.js"></script>
+    <script>
+        function getBib(key) {
+            const entry = entryDict[key];
+            const excludedTags = ['url', 'short', 'entryType'];
+            const tags = Object.entries(entry)
+                .filter(([tag]) => !excludedTags.includes(tag))
+                .map(([tag, value]) => `  ${tag}={${value}}`)
+                .join(',\n');
+            return `@${entry.entryType}{${key},\n${tags}\n}`;
+        }
+
+        function getRef(key) {
+            return `${entryDict[key].author}. "${entryDict[key].title}", ${entryDict[key].journal} (${entryDict[key].year})`;
+        }
+
+        function getShortRef(key) {
+            return entryDict[key].short;
+        }
+
+        function getTitle(key) {
+            return entryDict[key].title;
+        }
+
+        function copyToClipboard(text) {
+            navigator.clipboard.writeText(text);
+        }
+ 
+        const entryDict = {};
+        fetch('ref.bib')
+            .then(response => response.text())
+            .then(bibtex => {
+                const entries = bibtexParse.toJSON(bibtex);
+                for (const entry of entries) {
+                    entryDict[entry.citationKey] = entry.entryTags;
+                    entryDict[entry.citationKey].entryType = entry.entryType;
+                }
+                const bibItems = document.querySelectorAll('bib-li');
+                for (const item of bibItems) {
+                    const key = item.getAttribute('cite');
+                    const entry = entryDict[key];
+                    if (entry) {
+                        const title = entry.title || '';
+                        const authors = entry.author || '';
+                        const journal = entry.journal || '';
+                        const year = entry.year || '';
+                        const url = entry.url || '';
+                        
+                        // Create buttons with tooltips
+                        const pdfButton = url ? `<button onclick="window.open('${url}', '_blank')" title="${url}">PDF</button>` : '';
+                        const bibButton = `<button onclick="copyToClipboard(getBib('${key}'))" title="${getBib(key)}">BibTeX</button>`;
+                        const refButton = `<button onclick="copyToClipboard(getRef('${key}'))" title="${getRef(key)}">Ref</button>`;
+                        const shortRefButton = `<button onclick="copyToClipboard(getShortRef('${key}'))" title="${getShortRef(key)}">Short</button>`;
+                        const titleButton = `<button onclick="copyToClipboard(getTitle('${key}'))" title="${getTitle(key)}">Title</button>`;
+                        
+                        // Create the list item
+                        const li = document.createElement('li');
+                        li.className = 'reference-item';
+                        const previewText = `${authors}. "${title}", ${journal} (${year})`;
+                        li.innerHTML = `
+                            <span class="reference-text"><strong>${item.textContent}</strong></span>
+                            <div class="reference-buttons">${pdfButton} ${titleButton} ${bibButton} ${refButton} ${shortRefButton}</div>
+                            <div class="reference-preview">${previewText}</div>
+                        `;
+                        item.parentNode.replaceChild(li, item);
+                    }
+                }
+            })
+            .catch(error => {
+                document.getElementById('references').innerHTML = `<p>Error loading references: ${error.message}</p>`;
+            });
+    </script>
+</body>
+</html>
