@@ -70,6 +70,9 @@
                 <button class="keyword-btn" kw="phd">Ph.D. Thesis</button>
             </div>
         </div>
+        <div class="search-container">
+            <input type="text" id="search-input" placeholder="Search references..." class="search-input">
+        </div>
         <button id="clear-filter" class="clear-filter-btn">Clear Filter</button>
     </div>
 
@@ -247,6 +250,7 @@
         document.addEventListener('DOMContentLoaded', function() {
             const keywordButtons = document.querySelectorAll('.keyword-btn');
             const clearFilterBtn = document.getElementById('clear-filter');
+            const searchInput = document.getElementById('search-input');
             
             // Add click handlers to keyword buttons
             keywordButtons.forEach(btn => {
@@ -263,18 +267,28 @@
                 });
             });
 
+            // Search input handler
+            searchInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    applyFilters();
+                }
+            });
+
             // Clear filter button handler
             clearFilterBtn.addEventListener('click', () => {
                 keywordButtons.forEach(btn => btn.classList.remove('active'));
+                searchInput.value = '';
                 showAllReferences();
             });
 
-            function applyFilters(activeFilters) {
+            function applyFilters(activeFilters = []) {
                 const references = document.querySelectorAll('.reference-item');
                 const sections = document.querySelectorAll('h2');
+                const searchText = searchInput.value.toLowerCase().trim();
+                const searchWords = searchText ? searchText.split(/\s+/) : [];
                 
-                // If no filters are active, show everything
-                if (activeFilters.length === 0) {
+                // If no filters are active and no search text, show everything
+                if (activeFilters.length === 0 && searchWords.length === 0) {
                     showAllReferences();
                     return;
                 }
@@ -282,11 +296,17 @@
                 // Hide all references first
                 references.forEach(ref => ref.style.display = 'none');
                 
-                // Show only references that match all active filters
+                // Show only references that match all active filters and search text
                 references.forEach(ref => {
                     const keywords = (ref.getAttribute('kw') || '').split(' ');
-                    const matchesAll = activeFilters.every(filter => keywords.includes(filter));
-                    ref.style.display = matchesAll ? 'flex' : 'none';
+                    const matchesFilters = activeFilters.length === 0 || 
+                        activeFilters.every(filter => keywords.includes(filter));
+                    
+                    const refText = ref.textContent.toLowerCase();
+                    const matchesSearch = searchWords.length === 0 || 
+                        searchWords.every(word => refText.includes(word));
+                    
+                    ref.style.display = (matchesFilters && matchesSearch) ? 'flex' : 'none';
                 });
 
                 // Hide empty sections
