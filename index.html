@@ -4,64 +4,90 @@
     <!-- Basic meta elements -->
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>References</title>
+    <title>Refs</title>
 
     <!-- Custom CSS -->
     <link rel="stylesheet" href="style.css">
 
-    <!-- KaTeX -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.10.2/dist/katex.min.css">
-    <script src="https://cdn.jsdelivr.net/npm/katex@0.10.2/dist/katex.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/katex@0.10.2/dist/contrib/auto-render.min.js"></script>
+    <!-- MathJax -->
     <script>
-        var delimiters = [
-            { left: "$",   right: "$",   display: false}
-        ];
-    
-        document.addEventListener("DOMContentLoaded", function() {
-            renderMathInElement(document.body, { delimiters: delimiters });
-    
-            document.querySelectorAll("script[type='math/tex']").forEach(function(el) {
-                el.outerHTML = katex.renderToString(el.textContent, { 
-                    displayMode: false, 
-                    macros: macros 
-                });
-            });
-    
-            document.querySelectorAll("script[type='math/tex; mode=display']").forEach(function(el) {
-                el.outerHTML = katex.renderToString(el.textContent.replace(/%.*/g, ''), { 
-                    displayMode: true, 
-                    macros: macros 
-                });
-            });
-        });
+        MathJax = {
+            tex: {
+                inlineMath: [['$', '$']],
+                displayMath: [['$$', '$$']],
+                processEscapes: true,
+                macros: {
+                    abs: ['\\left|#1\\right|', 1],
+                }
+            },
+            svg: {
+                fontCache: 'global'
+            }
+        };
     </script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.10.2/dist/contrib/copy-tex.css">
-    <script src="https://cdn.jsdelivr.net/npm/katex@0.10.2/dist/contrib/copy-tex.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 </head>
 <body>
     <div class="masthead">
         <div class="container">
             <h1 class="masthead-title">References</h1>
-            <p class="masthead-subtitle">on hybrid CV-DV quantum computation and beyond</p>
+            <p class="masthead-subtitle">Why use cheesy softwares when you can diy?</p>
         </div>
     </div>
 
     <div id="content" class="reference-list">
-        <h2>Overview</h2>
-        <div id="references">
+        <h2>Hybrid CV-DV Quantum Computing</h2>
+        <div id="hybrid.bib" class="references">
             <ul>
-                <bib-li cite="liu2024hybrid">ISA</bib-li>
-                <bib-li cite="crane2024hybrid">Simulation</bib-li>
+                <bib-li cite="liu2024hybrid">ISA.</bib-li>
+                <bib-li cite="crane2024hybrid">Simulation.</bib-li>
             </ul>
         </div>
-        <h2>QSP</h2>
-        <div id="references">
+        <h2>Quantum Metrology</h2>
+        <div id="metro.bib" class="references">
             <ul>
-                <bib-li cite="low2017optimal">Hamiltonian Simulation by QSP</bib-li>
-                <bib-li cite="gilyen2019quantum">QSVT</bib-li>
+                <bib-li cite="chiribella2006optimal">
+                    Ph.D. thesis on covariant measurements.
+                </bib-li>
+                <bib-li cite="monras2006optimal">
+                    Optimal rotation estimation.
+                </bib-li>
+                <bib-li cite="lu2024number">
+                    Mutual information bound by Holevo-$\chi$.
+                </bib-li>
+                <bib-li cite="gorecki2025mutual">
+                    Mutual information bound by Fisher information.
+                </bib-li>
+                <bib-li cite="latune2013quantum">
+                    Study classical force, but proposes Gaussian purification method.
+                </bib-li>
+                <bib-li cite="wang2020quantum">
+                    Fisher Information Limit of damping constants and temperature
+                </bib-li>
+                <bib-li cite="gorecki2020pi">
+                    Optimal STD error bound for single parameter.
+                </bib-li>
+                <bib-li cite="gorecki2022multiple">
+                    Optimal STD error bound for multiple parameters.
+                </bib-li>
+                <bib-li cite="gorecki2023heisenberg">
+                    Ph.D. thesis of Wojciech G\'orecki.
+                </bib-li>
+                <bib-li cite="alushi2024optimality">
+                    Critical Quantum Sensing and Passive Quantum Sensing, noisy rotation estimation.
+                </bib-li>
+                <bib-li cite="gorecki2022quantum">
+                    Estimation of noisy displacement parameter $\abs{\alpha}$ by projecting onto initial state.
+                </bib-li>
+            </ul>
+        </div>
+        <h2>Quantum Signal Processing</h2>
+        <div id="qsp.bib" class="references">
+            <ul>
+                <bib-li cite="low2017optimal">Hamiltonian Simulation by QSP.</bib-li>
+                <bib-li cite="gilyen2019quantum">Orignial QSVT Paper.</bib-li>
             </ul>
         </div>
     </div>
@@ -76,7 +102,7 @@
     <script>
         function getBib(key) {
             const entry = entryDict[key];
-            const excludedTags = ['url', 'short', 'entryType'];
+            const excludedTags = ['url', 'short', 'entryType', 'arxiv'];
             const tags = Object.entries(entry)
                 .filter(([tag]) => !excludedTags.includes(tag))
                 .map(([tag, value]) => `  ${tag}={${value}}`)
@@ -98,51 +124,80 @@
 
         function copyToClipboard(text) {
             navigator.clipboard.writeText(text);
+            const toast = document.createElement('div');
+            toast.className = 'toast';
+            toast.textContent = 'Copied to clipboard!';
+            document.body.appendChild(toast);
+            // Show the toast
+            setTimeout(() => toast.classList.add('show'), 100);
+            // Hide and remove the toast after 2 seconds
+            setTimeout(() => {
+                toast.classList.remove('show');
+                setTimeout(() => toast.remove(), 300);
+            }, 1000);
         }
  
         const entryDict = {};
-        fetch('ref.bib')
-            .then(response => response.text())
-            .then(bibtex => {
+        
+        // Function to load a specific .bib file
+        async function loadBibFile(filename) {
+            try {
+                const response = await fetch(filename);
+                const bibtex = await response.text();
                 const entries = bibtexParse.toJSON(bibtex);
                 for (const entry of entries) {
                     entryDict[entry.citationKey] = entry.entryTags;
                     entryDict[entry.citationKey].entryType = entry.entryType;
                 }
-                const bibItems = document.querySelectorAll('bib-li');
-                for (const item of bibItems) {
-                    const key = item.getAttribute('cite');
-                    const entry = entryDict[key];
-                    if (entry) {
-                        const title = entry.title || '';
-                        const authors = entry.author || '';
-                        const journal = entry.journal || '';
-                        const year = entry.year || '';
-                        const url = entry.url || '';
-                        
-                        // Create buttons with tooltips
-                        const pdfButton = url ? `<button onclick="window.open('${url}', '_blank')" title="${url}">PDF</button>` : '';
-                        const bibButton = `<button onclick="copyToClipboard(getBib('${key}'))" title="${getBib(key)}">BibTeX</button>`;
-                        const refButton = `<button onclick="copyToClipboard(getRef('${key}'))" title="${getRef(key)}">Ref</button>`;
-                        const shortRefButton = `<button onclick="copyToClipboard(getShortRef('${key}'))" title="${getShortRef(key)}">Short</button>`;
-                        const titleButton = `<button onclick="copyToClipboard(getTitle('${key}'))" title="${getTitle(key)}">Title</button>`;
-                        
-                        // Create the list item
-                        const li = document.createElement('li');
-                        li.className = 'reference-item';
-                        const previewText = `${authors}. "${title}", ${journal} (${year})`;
-                        li.innerHTML = `
-                            <span class="reference-text"><strong>${item.textContent}</strong></span>
-                            <div class="reference-buttons">${pdfButton} ${titleButton} ${bibButton} ${refButton} ${shortRefButton}</div>
-                            <div class="reference-preview">${previewText}</div>
-                        `;
-                        item.parentNode.replaceChild(li, item);
-                    }
+            } catch (error) {
+                console.error(`Error loading ${filename}:`, error);
+            }
+        }
+
+        // Load all .bib files and then process the references
+        async function initializeReferences() {
+            // Get all reference divs and load their corresponding .bib files
+            const referenceDivs = document.querySelectorAll('.references');
+            await Promise.all(Array.from(referenceDivs).map(div => loadBibFile(div.id)));
+            
+            // Process all references
+            const bibItems = document.querySelectorAll('bib-li');
+            for (const item of bibItems) {
+                const key = item.getAttribute('cite');
+                const entry = entryDict[key];
+                if (entry) {
+                    const title = entry.title || '';
+                    const authors = entry.author || '';
+                    const journal = entry.journal || '';
+                    const year = entry.year || '';
+                    const url = entry.url || '';
+                    const arxiv = entry.arxiv ? `https://arxiv.org/pdf/${entry.arxiv}` : '';
+                    // Create buttons with tooltips
+                    const arxivButton = arxiv ? `<button onclick="window.open('${arxiv}', '_blank')" title="${arxiv}">arXiv</button>` : '';
+                    const linkButton = url ? `<button onclick="window.open('${url}', '_blank')" title="${url}">Link</button>` : '';
+                    const bibButton = `<button onclick="copyToClipboard(getBib('${key}'))" title="${getBib(key)}">BibTeX</button>`;
+                    const refButton = `<button onclick="copyToClipboard(getRef('${key}'))" title="${getRef(key)}">Ref</button>`;
+                    const shortRefButton = `<button onclick="copyToClipboard(getShortRef('${key}'))" title="${getShortRef(key)}">Short</button>`;
+                    const titleButton = `<button onclick="copyToClipboard(getTitle('${key}'))" title="${getTitle(key)}">Title</button>`;
+                    
+                    // Create the list item
+                    const li = document.createElement('li');
+                    li.className = 'reference-item';
+                    const previewText = `${authors}. "${title}", ${journal} (${year})`;
+                    li.innerHTML = `
+                        <span class="reference-text"><strong>${item.textContent}</strong></span>
+                        <div class="reference-buttons">${arxivButton} ${bibButton} ${linkButton} ${refButton} ${shortRefButton} ${titleButton}</div>
+                        <div class="reference-preview">${previewText}</div>
+                    `;
+                    item.parentNode.replaceChild(li, item);
                 }
-            })
-            .catch(error => {
-                document.getElementById('references').innerHTML = `<p>Error loading references: ${error.message}</p>`;
-            });
+            }
+        }
+
+        // Initialize references when the page loads
+        initializeReferences().catch(error => {
+            document.querySelector('.references').innerHTML = `<p>Error loading references: ${error.message}</p>`;
+        });
     </script>
 </body>
 </html>
